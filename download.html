@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A preparar download... | Portal Rich</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0d1117; --card: #161b22; --primary: #00ff88; --accent: #ff00ff; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; text-align: center; padding: 50px 20px; margin: 0; }
+        .download-box { 
+            background: var(--card); 
+            border: 2px solid var(--primary); 
+            border-radius: 20px; 
+            padding: 30px; 
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            max-width: 450px;
+            margin: auto;
+        }
+        .musica-info {
+            margin-bottom: 20px;
+        }
+        .musica-capa {
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            margin-bottom: 15px;
+        }
+        .musica-titulo {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin: 10px 0 5px;
+        }
+        .musica-artista {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        #timer { font-size: 80px; color: var(--primary); font-weight: 900; margin: 20px 0; text-shadow: 0 0 15px var(--primary); }
+        p { opacity: 0.8; font-size: 0.9rem; line-height: 1.5; }
+        .btn-ready { 
+            display: none; 
+            background: var(--primary); 
+            color: black; 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-weight: 900; 
+            text-decoration: none; 
+            border: none; 
+            width: 100%; 
+            cursor: pointer; 
+            font-size: 1rem;
+            box-shadow: 0 0 15px var(--primary);
+            animation: pulse 1.5s infinite;
+            margin-top: 20px;
+        }
+        .ad-placeholder { 
+            background: #000; 
+            border: 1px dashed #333; 
+            padding: 15px; 
+            margin: 20px 0; 
+            color: #555; 
+            border-radius: 10px; 
+            font-size: 0.7rem;
+        }
+        .fallback-box {
+            margin-top: 20px;
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            display: none;
+        }
+        .btn-youtube {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        .btn-copy {
+            background: #00f2ff;
+            color: black;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="download-box">
+    <div id="musica-info" class="musica-info">
+        <img id="capa" class="musica-capa" src="" alt="Capa da música">
+        <div id="titulo" class="musica-titulo"></div>
+        <div id="artista" class="musica-artista"></div>
+    </div>
+    <div id="timer">10</div>
+    <p>Aguarde 10 segundos para liberar o download do <b>Portal Rich Divulga</b>.</p>
+    
+    <div class="ad-placeholder" id="ad-space">
+        <!-- CÓDIGO DO GOOGLE ADSENSE AQUI -->
+        PUBLICIDADE<br>
+        Seu anúncio aparecerá aqui.
+    </div>
+
+    <button id="btn-final" class="btn-ready">⬇️ BAIXAR MP3</button>
+
+    <div id="fallback-box" class="fallback-box">
+        <p>✅ Anúncio exibido! Para continuar, clique no botão abaixo para abrir o serviço de download em uma nova aba.</p>
+        <button id="btn-abrir-servico" class="btn-youtube">🔗 Abrir serviço de download</button>
+        <button id="btn-copy-link" class="btn-copy">📋 Copiar link do YouTube</button>
+        <p style="margin-top: 15px; font-size: 0.7rem;">Se o serviço não carregar, copie o link e use um site como <strong>y2mate.com</strong> ou <strong>savefrom.net</strong> manualmente.</p>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const file = urlParams.get('file');
+    const name = urlParams.get('name');
+    const artist = urlParams.get('artist');
+    const cover = urlParams.get('cover');
+    const videoId = urlParams.get('videoId');
+    const type = urlParams.get('type');
+
+    let isYouTube = (type === 'youtube' && videoId);
+    let downloadUrl = "";
+    let filename = "";
+
+    // Exibir informações
+    if (isYouTube) {
+        document.getElementById('titulo').innerText = name || "Vídeo do YouTube";
+        document.getElementById('artista').innerText = "YouTube";
+        document.getElementById('capa').src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        downloadUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        filename = `${(name || "video").replace(/[^a-zA-Z0-9]/g, '_')}.mp3`;
+    } else if (file) {
+        document.getElementById('titulo').innerText = name || "Música";
+        document.getElementById('artista').innerText = artist || "Portal Rich";
+        if (cover) {
+            document.getElementById('capa').src = cover;
+        } else {
+            document.getElementById('capa').src = "assets/default.jpg";
+        }
+        downloadUrl = file;
+        let artistaLimpo = (artist || "artista").replace(/[^a-zA-Z0-9]/g, '_');
+        let tituloLimpo = (name || "musica").replace(/[^a-zA-Z0-9]/g, '_');
+        filename = `${artistaLimpo} - ${tituloLimpo}.mp3`;
+    } else {
+        document.getElementById('titulo').innerText = "Link inválido";
+        document.getElementById('artista').innerText = "";
+        document.getElementById('capa').src = "assets/default.jpg";
+    }
+
+    let tempo = 10;
+    const contagem = setInterval(() => {
+        tempo--;
+        document.getElementById('timer').innerText = tempo;
+        if (tempo <= 0) {
+            clearInterval(contagem);
+            document.getElementById('timer').style.display = "none";
+            document.getElementById('btn-final').style.display = "block";
+        }
+    }, 1000);
+
+    document.getElementById('btn-final').onclick = function() {
+        if (isYouTube) {
+            document.getElementById('fallback-box').style.display = "block";
+            this.style.display = "none";
+        } else {
+            // Download direto sem manipulação do arquivo
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            this.innerText = "✅ DESCARREGADO!";
+        }
+    };
+
+    // Fallback YouTube
+    document.getElementById('btn-abrir-servico').onclick = function() {
+        const downloadServiceUrl = `https://en.savefrom.net/1-youtube-video-downloader-${videoId}/`;
+        window.open(downloadServiceUrl, '_blank');
+    };
+    document.getElementById('btn-copy-link').onclick = function() {
+        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        navigator.clipboard.writeText(youtubeUrl).then(() => alert("Link do YouTube copiado! Use um site como y2mate.com para baixar."));
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Portal Rich</title>
+    <style>
+        :root { --neon: #00f2ff; --purple: #bc13fe; --dark: #0a0a0a; }
+        body { background: var(--dark); color: #fff; font-family: 'Inter', sans-serif; padding: 15px; margin: 0; }
+        .container { max-width: 1000px; margin: auto; }
+        .card { background: #111; border: 1px solid #333; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        h2, h3 { color: var(--neon); margin-top: 0; }
+        label { display: block; font-size: 12px; color: var(--purple); margin: 10px 0 5px; }
+        input, textarea { width: 100%; padding: 10px; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; }
+        button { background: var(--neon); color: #000; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 10px; }
+        .btn-danger { background: #ff4444; color: white; }
+        .item-lista { background: #1a1f2e; padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .item-info { flex: 1; }
+        .item-info strong { display: block; }
+        .hidden { display: none; }
+        .aviso { background: #ff990022; border-left: 4px solid #ff9900; padding: 10px; font-size: 12px; margin: 15px 0; border-radius: 6px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-site { background: #1DB954; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        .file-preview { margin: 5px 0 10px; font-size: 12px; color: var(--neon); }
+        .copy-btn { background: #30363d; color: white; padding: 4px 8px; font-size: 12px; margin-left: 10px; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="top-bar">
+        <h2 style="margin:0;">💸 Portal Rich - Admin</h2>
+        <a href="home.html" target="_blank" class="btn-site">🌐 Ver Site Principal</a>
+    </div>
+
+    <div class="card">
+        <h2>📀 Gerenciar Músicas Locais</h2>
+        <div id="lista-musicas"></div>
+        <h3>➕ Adicionar nova música</h3>
+        <div>
+            <label>Título</label>
+            <input type="text" id="novoTitulo" placeholder="Ex: LUZ DO DIA">
+            <label>Artista</label>
+            <input type="text" id="novoArtista" placeholder="Ex: DANNY CY">
+            <label>Capa (imagem)</label>
+            <input type="file" id="novaCapaFile" accept="image/*">
+            <div id="capaPreview" class="file-preview"></div>
+            <label>Áudio (MP3, M4A)</label>
+            <input type="file" id="novoAudioFile" accept="audio/*">
+            <div id="audioPreview" class="file-preview"></div>
+            <button onclick="gerarNomes()">🔍 Gerar nomes dos arquivos</button>
+            <button onclick="adicionarMusica()">➕ Adicionar música (salvar metadados)</button>
+        </div>
+        <div class="aviso">
+            ⚠️ Após selecionar os arquivos, clique em "Gerar nomes", copie os nomes sugeridos e faça upload dos arquivos para as pastas <strong>assets/</strong> e <strong>musicas/</strong> do Netlify (arrastando os arquivos). Depois clique em "Adicionar música" para salvar no site.
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>⭐ Gerenciar Destaques (Vídeos YouTube)</h2>
+        <div id="lista-destaques"></div>
+        <h3>➕ Adicionar destaque</h3>
+        <div>
+            <label>ID do YouTube (ex: dQw4w9WgXcQ)</label>
+            <input type="text" id="novoIdYoutube" placeholder="ID do vídeo">
+            <label>Título</label>
+            <input type="text" id="novoTituloDestaque" placeholder="Título do vídeo">
+            <label>Artista/Canal</label>
+            <input type="text" id="novoArtistaDestaque" placeholder="Artista">
+            <button onclick="adicionarDestaque()">➕ Adicionar destaque</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCBZ4yTbDv-vwL4rdKCF39NVI8WzLW1Yzc",
+        authDomain: "portal-rich-divulga-angola.firebaseapp.com",
+        databaseURL: "https://portal-rich-divulga-angola-default-rtdb.firebaseio.com",
+        projectId: "portal-rich-divulga-angola",
+        storageBucket: "portal-rich-divulga-angola.firebasestorage.app",
+        messagingSenderId: "410802724742",
+        appId: "1:410802724742:web:97452059340f10d71f1607",
+        measurementId: "G-JW522BHFBT"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    let nomeCapaSugerido = '';
+    let nomeAudioSugerido = '';
+
+    auth.onAuthStateChanged(user => {
+        if (!user) window.location.href = 'admin-login.html';
+        else {
+            carregarMusicas();
+            carregarDestaques();
+        }
+    });
+
+    function gerarNomes() {
+        const titulo = document.getElementById('novoTitulo').value.trim().toUpperCase().replace(/\s+/g, '_');
+        const artista = document.getElementById('novoArtista').value.trim().toUpperCase().replace(/\s+/g, '_');
+        const capaFile = document.getElementById('novaCapaFile').files[0];
+        const audioFile = document.getElementById('novoAudioFile').files[0];
+
+        if (!titulo || !artista) {
+            alert("Preencha título e artista primeiro.");
+            return;
+        }
+
+        if (capaFile) {
+            const ext = capaFile.name.split('.').pop().toLowerCase();
+            nomeCapaSugerido = `${titulo}_${artista}_capa.${ext}`;
+            document.getElementById('capaPreview').innerHTML = `📸 Nome sugerido: ${nomeCapaSugerido} <button class="copy-btn" onclick="copiarTexto('${nomeCapaSugerido}')">Copiar</button>`;
+        } else {
+            document.getElementById('capaPreview').innerHTML = '';
+        }
+
+        if (audioFile) {
+            const ext = audioFile.name.split('.').pop().toLowerCase();
+            nomeAudioSugerido = `${titulo}_${artista}_audio.${ext}`;
+            document.getElementById('audioPreview').innerHTML = `🎵 Nome sugerido: ${nomeAudioSugerido} <button class="copy-btn" onclick="copiarTexto('${nomeAudioSugerido}')">Copiar</button>`;
+        } else {
+            document.getElementById('audioPreview').innerHTML = '';
+        }
+    }
+
+    function copiarTexto(texto) {
+        navigator.clipboard.writeText(texto).then(() => alert("Nome copiado!"));
+    }
+
+    function adicionarMusica() {
+        const titulo = document.getElementById('novoTitulo').value.trim().toUpperCase();
+        const artista = document.getElementById('novoArtista').value.trim().toUpperCase();
+        const capaNome = nomeCapaSugerido;
+        const audioNome = nomeAudioSugerido;
+
+        if (!titulo || !artista || !capaNome || !audioNome) {
+            alert("Preencha título, artista e gere os nomes dos arquivos primeiro.");
+            return;
+        }
+
+        const novaMusica = {
+            id: Date.now(),
+            titulo,
+            artista,
+            capa: `assets/${capaNome}`,
+            arquivo: `musicas/${audioNome}`,
+            destaque: false
+        };
+
+        db.ref('musicas').push().set(novaMusica)
+            .then(() => {
+                alert("Música adicionada! Lembre-se de fazer upload dos arquivos com os nomes sugeridos para as pastas assets/ e musicas/ no Netlify.");
+                document.getElementById('novoTitulo').value = '';
+                document.getElementById('novoArtista').value = '';
+                document.getElementById('novaCapaFile').value = '';
+                document.getElementById('novoAudioFile').value = '';
+                document.getElementById('capaPreview').innerHTML = '';
+                document.getElementById('audioPreview').innerHTML = '';
+                nomeCapaSugerido = '';
+                nomeAudioSugerido = '';
+            })
+            .catch(err => alert("Erro: " + err.message));
+    }
+
+    function carregarMusicas() {
+        db.ref('musicas').on('value', snapshot => {
+            const musicas = snapshot.val() || {};
+            const container = document.getElementById('lista-musicas');
+            container.innerHTML = '<h3>🎵 Músicas cadastradas</h3>';
+            if (Object.keys(musicas).length === 0) {
+                container.innerHTML += '<p>Nenhuma música cadastrada.</p>';
+                return;
+            }
+            for (let id in musicas) {
+                const m = musicas[id];
+                container.innerHTML += `
+                    <div class="item-lista">
+                        <div class="item-info">
+                            <strong>${m.artista} - ${m.titulo}</strong>
+                            <small>Capa: ${m.capa} | Áudio: ${m.arquivo}</small>
+                        </div>
+                        <div>
+                            <button onclick="editarMusica('${id}')">✏️ Editar</button>
+                            <button class="btn-danger" onclick="removerMusica('${id}')">🗑️ Remover</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    function editarMusica(id) {
+        db.ref(`musicas/${id}`).once('value', snapshot => {
+            const m = snapshot.val();
+            const novoTitulo = prompt("Novo título:", m.titulo);
+            if (!novoTitulo) return;
+            const novoArtista = prompt("Novo artista:", m.artista);
+            if (!novoArtista) return;
+            const novaCapa = prompt("Novo nome da capa (assets/):", m.capa.replace('assets/', ''));
+            if (!novaCapa) return;
+            const novoAudio = prompt("Novo nome do áudio (musicas/):", m.arquivo.replace('musicas/', ''));
+            if (!novoAudio) return;
+            const atualizada = {
+                ...m,
+                titulo: novoTitulo.toUpperCase(),
+                artista: novoArtista.toUpperCase(),
+                capa: `assets/${novaCapa}`,
+                arquivo: `musicas/${novoAudio}`
+            };
+            db.ref(`musicas/${id}`).set(atualizada).then(() => alert("Música atualizada!"));
+        });
+    }
+
+    function removerMusica(id) {
+        if (confirm("Remover esta música?")) {
+            db.ref(`musicas/${id}`).remove().then(() => alert("Música removida."));
+        }
+    }
+
+    function carregarDestaques() {
+        db.ref('destaques').on('value', snapshot => {
+            const destaques = snapshot.val() || {};
+            const container = document.getElementById('lista-destaques');
+            container.innerHTML = '<h3>⭐ Destaques da Semana</h3>';
+            if (Object.keys(destaques).length === 0) {
+                container.innerHTML += '<p>Nenhum destaque cadastrado.</p>';
+                return;
+            }
+            for (let id in destaques) {
+                const d = destaques[id];
+                container.innerHTML += `
+                    <div class="item-lista">
+                        <div class="item-info">
+                            <strong>${d.titulo}</strong> - ${d.artista}<br>
+                            <small>ID: ${d.id}</small>
+                        </div>
+                        <div>
+                            <button onclick="editarDestaque('${id}')">✏️ Editar</button>
+                            <button class="btn-danger" onclick="removerDestaque('${id}')">🗑️ Remover</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    function adicionarDestaque() {
+        const videoId = document.getElementById('novoIdYoutube').value.trim();
+        const titulo = document.getElementById('novoTituloDestaque').value.trim();
+        const artista = document.getElementById('novoArtistaDestaque').value.trim();
+        if (!videoId || !titulo || !artista) {
+            alert("Preencha todos os campos.");
+            return;
+        }
+        db.ref('destaques').push().set({ id: videoId, titulo, artista })
+            .then(() => {
+                alert("Destaque adicionado!");
+                document.getElementById('novoIdYoutube').value = '';
+                document.getElementById('novoTituloDestaque').value = '';
+                document.getElementById('novoArtistaDestaque').value = '';
+            })
+            .catch(err => alert("Erro: " + err.message));
+    }
+
+    function editarDestaque(id) {
+        db.ref(`destaques/${id}`).once('value', snapshot => {
+            const d = snapshot.val();
+            const novoId = prompt("Novo ID do YouTube:", d.id);
+            if (!novoId) return;
+            const novoTitulo = prompt("Novo título:", d.titulo);
+            if (!novoTitulo) return;
+            const novoArtista = prompt("Novo artista:", d.artista);
+            if (!novoArtista) return;
+            db.ref(`destaques/${id}`).set({ id: novoId, titulo: novoTitulo, artista: novoArtista })
+                .then(() => alert("Destaque atualizado!"));
+        });
+    }
+
+    function removerDestaque(id) {
+        if (confirm("Remover este destaque?")) {
+            db.ref(`destaques/${id}`).remove().then(() => alert("Destaque removido."));
+        }
+    }
+</script>
+</body>
+</html>

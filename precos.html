@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preços | Portal Rich Divulga</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --neon: #00f2ff;
+            --dark: #0a0a0a;
+            --card: #111;
+            --purple: #bc13fe;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: var(--dark);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        
+        /* Cabeçalho */
+        .header {
+            background: #000;
+            border-bottom: 2px solid var(--neon);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 900;
+        }
+        .logo span {
+            color: var(--neon);
+        }
+        .back-link {
+            color: var(--neon);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Container principal */
+        .pricing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .pricing-title {
+            text-align: center;
+            font-size: 2.2rem;
+            color: var(--neon);
+            margin-bottom: 10px;
+        }
+        .pricing-sub {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 50px;
+            font-size: 1rem;
+        }
+        
+        /* Grid de cards */
+        .pricing-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+        .pricing-card {
+            background: var(--card);
+            border: 1px solid #333;
+            border-radius: 24px;
+            padding: 30px 25px;
+            width: 320px;
+            text-align: center;
+            transition: 0.3s;
+            position: relative;
+        }
+        .pricing-card:hover {
+            border-color: var(--neon);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,242,255,0.1);
+        }
+        .pricing-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+        .price {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--neon);
+            margin: 20px 0 5px;
+        }
+        .price small {
+            font-size: 0.9rem;
+            color: #aaa;
+            font-weight: normal;
+        }
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 25px 0;
+            text-align: left;
+        }
+        .features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .features li i {
+            color: #00ff88;
+            width: 20px;
+        }
+        .btn-pricing {
+            background: linear-gradient(135deg, var(--neon), var(--purple));
+            color: #000;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .btn-pricing:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px var(--neon);
+        }
+        .badge {
+            background: linear-gradient(135deg, #ff00ff, #ff8800);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-bottom: 15px;
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Benefícios extras */
+        .extras {
+            margin-top: 60px;
+            background: #0f0f0f;
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid #222;
+        }
+        .extras h3 {
+            color: var(--neon);
+            margin-bottom: 20px;
+        }
+        .extras-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .extra-item {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+        }
+        .extra-item i {
+            font-size: 2rem;
+            color: var(--neon);
+            margin-bottom: 10px;
+        }
+        
+        /* Rodapé */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            border-top: 1px solid #222;
+            margin-top: 50px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        @media (max-width: 768px) {
+            .pricing-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+            .pricing-card {
+                width: 100%;
+                max-width: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">💸PORTAL<span> RICH DIVULGA</span></div>
+    <a href="home.html" class="back-link"><i class="fas fa-arrow-left"></i> Voltar ao portal</a>
+</header>
+
+<div class="pricing-container">
+    <h1 class="pricing-title">🎵 Divulgue sua Música</h1>
+    <p class="pricing-sub">Escolha o pacote ideal e leve seu som para milhares de pessoas</p>
+
+    <div class="pricing-grid">
+        <!-- Pacote Básico -->
+        <div class="pricing-card">
+            <h3>🚀 BÁSICO</h3>
+            <div class="price">2.500 Kz</div>
+            <small>Publicação única</small>
+            <ul class="features">
+                <li><i class="fas fa-check-circle"></i> Divulgação por <strong>7 dias</strong> no portal</li>
+                <li><i class="fas fa-check-circle"></i> Post no <strong>Facebook</strong> oficial</li>
+                <li><i class="fas fa-check-circle"></i> Capa e áudio hospedados</li>
+                <li><i class="fas fa-check-circle"></i> Link direto para download</li>
+            </ul>
+            <button class="btn-pricing" onclick="contatoWhatsApp('Básico', 2500)">🎧 QUERO DIVULGAR</button>
+        </div>
+
+        <!-- Pacote Destaque -->
+        <div class="pricing-card">
+            <div class="badge">🔥 MAIS ESCOLHIDO</div>
+            <h3>⭐ DESTAQUE</h3>
+            <div class="price">5.000 Kz</div>
+            <small>Maior alcance garantido</small>
+            <ul class="features">
+                <li><i class="fas fa-check-circle"></i> Divulgação por <strong>15 dias</strong> na home</li>
+                <li><i class="fas fa-check-circle"></i> Post <strong>patrocinado</strong> no Facebook</li>
+                <li><i class="fas fa-check-circle"></i> Alcance estimado <strong>2.000+ pessoas</strong></li>
+                <li><i class="fas fa-check-circle"></i> Selo <strong>"Destaque da Semana"</strong></li>
+                <li><i class="fas fa-check-circle"></i> Relatório de desempenho</li>
+                <li><i class="fas fa-check-circle"></i> Compartilhamento em grupos de música</li>
+            </ul>
+            <button class="btn-pricing" onclick="contatoWhatsApp('Destaque', 5000)">⭐ QUERO DESTAQUE</button>
+        </div>
+
+        <!-- Pacote Trimestral -->
+        <div class="pricing-card">
+            <h3>📅 TRIMESTRAL</h3>
+            <div class="price">12.000 Kz</div>
+            <small>3 meses de divulgação</small>
+            <ul class="features">
+                <li><i class="fas fa-check-circle"></i> <strong>Todos os benefícios</strong> do Destaque</li>
+                <li><i class="fas fa-check-circle"></i> 3 meses contínuos de divulgação</li>
+                <li><i class="fas fa-check-circle"></i> <strong>Desconto exclusivo</strong> de 20%</li>
+                <li><i class="fas fa-check-circle"></i> Prioridade no atendimento</li>
+                <li><i class="fas fa-check-circle"></i> Relatórios mensais</li>
+            </ul>
+            <button class="btn-pricing" onclick="contatoWhatsApp('Trimestral', 12000)">📢 QUERO 3 MESES</button>
+        </div>
+    </div>
+
+    <!-- Benefícios Extras -->
+    <div class="extras">
+        <h3><i class="fas fa-gem"></i> Benefícios Extras</h3>
+        <div class="extras-grid">
+            <div class="extra-item">
+                <i class="fas fa-percent"></i>
+                <p><strong>Renovação com desconto</strong><br>20% off para artistas que mantêm a música em destaque</p>
+            </div>
+            <div class="extra-item">
+                <i class="fas fa-chart-line"></i>
+                <p><strong>Relatório de desempenho</strong><br>Envio de prints dos alcances no Facebook</p>
+            </div>
+            <div class="extra-item">
+                <i class="fas fa-credit-card"></i>
+                <p><strong>Pagamento facilitado</strong><br>WhatsApp, Transferência Bancária, E-Kwanza</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 Portal Rich Divulga | 📞 Dúvidas? Fale conosco pelo WhatsApp</p>
+        <p style="margin-top: 10px;">💳 Pagamento via WhatsApp | Transferência Bancária | E-Kwanza</p>
+    </div>
+</div>
+
+<script>
+    function contatoWhatsApp(pacote, valor) {
+        const mensagem = `Olá! Gostaria de contratar o pacote *${pacote}* no valor de *${valor} Kz* para divulgar minha música.`;
+        // Substitua o número abaixo pelo seu WhatsApp comercial
+        const numero = "244900000000";
+        const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+        window.open(url, '_blank');
+    }
+</script>
+</body>
+</html>

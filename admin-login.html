@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Portal Rich</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .admin-login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .admin-login-card {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 1px solid #1e293b;
+        }
+        
+        .admin-login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .admin-login-header i {
+            font-size: 60px;
+            color: #00f2ff;
+            margin-bottom: 15px;
+        }
+        
+        .admin-login-header h1 {
+            color: white;
+            font-size: 28px;
+        }
+        
+        .admin-login-header p {
+            color: #aaa;
+            margin-top: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-size: 14px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #0a0f1a;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #00f2ff;
+            box-shadow: 0 0 5px #00f2ff;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #00f2ff 0%, #bc13fe 100%);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,242,255,0.3);
+        }
+        
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .success-message {
+            background: #2ecc71;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #00f2ff;
+            text-decoration: none;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .create-account {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .create-account a {
+            color: #00f2ff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="admin-login-card">
+            <div class="admin-login-header">
+                <i class="fas fa-shield-alt"></i>
+                <h1>Portal Rich</h1>
+                <p>Acesso restrito ao administrador</p>
+            </div>
+            
+            <div id="errorMsg" class="error-message"></div>
+            <div id="successMsg" class="success-message"></div>
+            
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="adminEmail" placeholder="admin@portalrich.com">
+            </div>
+            
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" id="adminPassword" placeholder="••••••••">
+            </div>
+            
+            <button class="login-btn" onclick="loginAdmin()">Entrar</button>
+            
+            <div class="create-account">
+                <a href="#" onclick="mostrarCriarConta()">Criar conta de administrador</a>
+            </div>
+            
+            <div class="back-link">
+                <a href="home.html">← Voltar para o site</a>
+            </div>
+        </div>
+    </div>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <script>
+        // ========== CONFIGURAÇÃO DO FIREBASE ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBZ4yTbDv-vwL4rdKCF39NVI8WzLW1Yzc",
+            authDomain: "portal-rich-divulga-angola.firebaseapp.com",
+            databaseURL: "https://portal-rich-divulga-angola-default-rtdb.firebaseio.com",
+            projectId: "portal-rich-divulga-angola",
+            storageBucket: "portal-rich-divulga-angola.firebasestorage.app",
+            messagingSenderId: "410802724742",
+            appId: "1:410802724742:web:97452059340f10d71f1607",
+            measurementId: "G-JW522BHFBT"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
+        // Verificar se já está logado
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Já logado, redirecionar para o admin
+                window.location.href = 'admin.html';
+            }
+        });
+        
+        function loginAdmin() {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('errorMsg');
+            const successDiv = document.getElementById('successMsg');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            if (!email || !password) {
+                errorDiv.textContent = 'Preencha todos os campos!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    successDiv.textContent = 'Login realizado! Redirecionando...';
+                    successDiv.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1500);
+                })
+                .catch(error => {
+                    errorDiv.textContent = error.message;
+                    errorDiv.style.display = 'block';
+                });
+        }
+        
+        function mostrarCriarConta() {
+            // Prompt simples para criar conta (caso ainda não tenha)
+            const email = prompt("Digite o e-mail do administrador:");
+            if (!email) return;
+            const senha = prompt("Digite a senha (mínimo 6 caracteres):");
+            if (!senha || senha.length < 6) {
+                alert("A senha deve ter pelo menos 6 caracteres.");
+                return;
+            }
+            
+            auth.createUserWithEmailAndPassword(email, senha)
+                .then(() => {
+                    alert("Usuário criado com sucesso! Agora faça login.");
+                })
+                .catch(error => {
+                    alert("Erro: " + error.message);
+                });
+        }
+    </script>
+</body>
+</html>

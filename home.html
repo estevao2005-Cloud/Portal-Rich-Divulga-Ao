@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Portal Rich | Música e Vídeo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ===== ESTILOS ADICIONAIS ===== */
+        .result-section { margin: 20px 0; }
+        .section-title {
+            font-size: 1.2rem;
+            margin: 15px 0 10px;
+            color: #00f2ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #00f2ff;
+            padding-left: 12px;
+        }
+        .search-results { display: flex; flex-direction: column; gap: 12px; }
+        .result-card {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            border: 1px solid #30363d;
+            transition: 0.2s;
+        }
+        .result-card:hover { border-color: #00f2ff; }
+        .result-card img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; }
+        .result-info { flex: 1; }
+        .result-info h3 { font-size: 1rem; margin: 0 0 4px; }
+        .result-info p { font-size: 0.8rem; color: #8b949e; margin: 0; }
+        .result-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-small {
+            background: #238636; color: white; border: none; padding: 6px 12px;
+            border-radius: 20px; font-size: 0.7rem; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-youtube { background: #ff0000; }
+        .btn-download-youtube { background: #f97316; }
+        .btn-share { background: #00f2ff; color: black; }
+        .ver-mais {
+            background: transparent; border: 1px solid #00f2ff; color: #00f2ff;
+            padding: 10px; border-radius: 30px; margin: 15px auto;
+            display: inline-block; cursor: pointer; text-align: center;
+            width: 100%; max-width: 200px; font-weight: bold;
+        }
+        .btn-voltar-pesquisa {
+            background: #30363d; color: white; border: none;
+            padding: 8px 16px; border-radius: 20px; font-size: 0.8rem;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .loading { text-align: center; padding: 20px; color: #aaa; }
+        .hidden { display: none; }
+        .featured-scroll { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 10px; }
+        .featured-card {
+            min-width: 140px; background: #161b22; border-radius: 12px; padding: 8px;
+            cursor: pointer; text-align: center; transition: 0.3s; border: 1px solid #30363d;
+        }
+        .featured-card:hover { border-color: #00f2ff; transform: translateY(-5px); }
+        .featured-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px; }
+        .featured-card h4 { font-size: 0.8rem; margin: 8px 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
+        }
+        .modal-content { position: relative; width: 90%; max-width: 800px; background: #000; border-radius: 16px; overflow: hidden; }
+        .modal-content iframe { width: 100%; aspect-ratio: 16 / 9; border: none; }
+        .close-modal { position: absolute; top: 10px; right: 20px; color: white; font-size: 30px; cursor: pointer; z-index: 2001; }
+        @media (max-width: 600px) {
+            .result-card { flex-direction: column; text-align: center; }
+            .result-buttons { justify-content: center; }
+        }
+        
+        /* Botão Divulgar no cabeçalho */
+        .btn-divulgar {
+            background: linear-gradient(135deg, #00f2ff, #bc13fe);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            margin-left: 15px;
+            white-space: nowrap;
+        }
+        .btn-divulgar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 12px #00f2ff;
+        }
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        @media (max-width: 768px) {
+            .btn-divulgar {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+                margin-left: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="main-header">
+    <div class="logo">💸PORTAL<span> RICH DIVULGA</span></div>
+
+        <div id="barra-pesquisa" class="search-bar">
+            <div class="search-wrapper">
+                <input type="text" id="search-input" placeholder="Pesquisar música, artista..." onkeyup="handleSearch()">
+                <button class="btn-lupa" onclick="pesquisarGeral()">🪩</button>
+            </div> <div class="header-buttons">
+     <a href="precos.html" class="btn-divulgar">💰 Divulgar</a>
+        </
+        >
+    </div>
+</header>
+
+<main id="app">
+    <section class="featured-section" id="destaques-section">
+        <div class="section-title"><i class="fas fa-star" style="color: gold;"></i> DESTAQUE DA SEMANA</div>
+        <div id="featured-scroll" class="featured-scroll"></div>
+    </section>
+
+    <div id="resultados-pesquisa" class="result-section hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div class="section-title"><i class="fas fa-search"></i> RESULTADOS DA PESQUISA</div>
+            <button class="btn-voltar-pesquisa" onclick="limparPesquisa()"><i class="fas fa-arrow-left"></i> Voltar</button>
+        </div>
+        <div id="resultados-container" class="search-results"></div>
+        <div id="ver-mais-container" style="text-align: center;"></div>
+        <div id="loading-youtube" class="loading hidden">Carregando mais resultados...</div>
+    </div>
+
+    <section id="inicio" class="conteudo">
+        <div class="section-title">Últimos Lançamentos (Artistas Independentes)</div>
+        <div id="portal-feed" class="feed-grid"></div>
+    </section>
+
+    <section id="detalhes-musica" class="conteudo hidden">
+        <div class="page-detalhes">
+            <button class="btn-voltar" onclick="mostrarSecao('inicio')">← Voltar para a lista</button>
+            <div class="card-detalhe-central">
+                <img id="capa-detalhe" src="" alt="Capa da Música">
+                <h2 id="titulo-detalhe"></h2>
+                <p id="artista-detalhe"></p>
+                <a href="#" class="btn-download">BAIXAR MP3 AGORA</a>
+                <button class="btn-neon" style="margin-top: 15px;" onclick="copiarLink()">🔗 COPIAR LINK DA MÚSICA</button>
+                <div id="copy-toast" class="hidden" style="color: #00ff88; margin-top: 10px;">✅ Link Copiado!</div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div id="player-bar" class="player-bar hidden">
+    <div class="player-info"><strong id="p-titulo">---</strong><small id="p-artista">---</small></div>
+    <div class="player-controls"><button onclick="togglePlay()" id="play-btn">▶</button></div>
+    <audio id="main-audio"></audio>
+</div>
+
+<div id="videoModal" class="modal">
+    <span class="close-modal" onclick="fecharModal()">&times;</span>
+    <div class="modal-content"><iframe id="youtubeIframe" src="" allowfullscreen></iframe></div>
+</div>
+
+<footer>© 2026 ᴘᴏʀᴛᴀʟ ʀɪᴄʜ ᴅɪᴠᴜʟɢᴀ ᴛᴏᴅᴏs ᴏs ᴅɪʀᴇɪᴛᴏs ʀᴇsᴇʀᴠᴀᴅᴏs.</footer>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="utils.js"></script>
+
+<script>
+    // ========== CONFIGURAÇÃO DO FIREBASE ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyCBZ4yTbDv-vwL4rdKCF39NVI8WzLW1Yzc",
+        authDomain: "portal-rich-divulga-angola.firebaseapp.com",
+        databaseURL: "https://portal-rich-divulga-angola-default-rtdb.firebaseio.com",
+        projectId: "portal-rich-divulga-angola",
+        storageBucket: "portal-rich-divulga-angola.firebasestorage.app",
+        messagingSenderId: "410802724742",
+        appId: "1:410802724742:web:97452059340f10d71f1607",
+        measurementId: "G-JW522BHFBT"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ========== VARIÁVEIS GLOBAIS ==========
+    let musicasData = [];
+    let currentQuery = "";
+    let nextPageToken = null;
+    let isLoadingMore = false;
+    const YOUTUBE_API_KEY = "AIzaSyCmI5QGr6kM9ZvvYcG7_ckcho870-6WAr0";
+
+    // ========== CARREGAR DADOS DO FIREBASE ==========
+    function carregarMusicasFirebase() {
+        db.ref('musicas').on('value', snapshot => {
+            musicasData = [];
+            snapshot.forEach(child => {
+                musicasData.push(child.val());
+            });
+            renderizarFeedLocal();
+        });
+    }
+
+    function carregarDestaquesFirebase() {
+        db.ref('destaques').on('value', snapshot => {
+            const destaques = [];
+            snapshot.forEach(child => {
+                destaques.push(child.val());
+            });
+            renderizarDestaques(destaques);
+        });
+    }
+
+    function renderizarFeedLocal() {
+        const feed = document.getElementById('portal-feed');
+        if (!feed) return;
+        feed.innerHTML = '';
+        musicasData.forEach(m => {
+            const card = document.createElement('article');
+            card.className = m.destaque ? "post-card destaque-semana" : "post-card";
+            card.innerHTML = `
+                <img src="${m.capa}" alt="Capa" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}')">
+                <div class="info" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}')">
+                    <h3>${m.artista} - ${m.titulo}</h3>
+                    <small>Portal Rich Divulga</small>
+                </div>
+            `;
+            feed.appendChild(card);
+        });
+    }
+
+    function renderizarDestaques(destaques) {
+        const container = document.getElementById('featured-scroll');
+        if (!container) return;
+        container.innerHTML = '';
+        destaques.forEach(d => {
+            const card = document.createElement('div');
+            card.className = "featured-card";
+            card.onclick = () => abrirVideo(d.id);
+            card.innerHTML = `
+                <img src="https://img.youtube.com/vi/${d.id}/mqdefault.jpg" alt="${d.titulo}">
+                <h4>${d.titulo}</h4>
+                <small>${d.artista}</small>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ========== FUNÇÕES DE PESQUISA ==========
+    function handleSearch() {
+        const q = document.getElementById('search-input').value.trim();
+        if (q.length >= 2) {
+            pesquisarGeral();
+        } else {
+            limparPesquisa();
+        }
+    }
+
+    function pesquisarGeral() {
+        const query = document.getElementById('search-input').value.trim();
+        if (query.length < 2) return;
+        currentQuery = query;
+        nextPageToken = null;
+        isLoadingMore = false;
+
+        document.getElementById('inicio').classList.add('hidden');
+        document.getElementById('destaques-section').classList.add('hidden');
+        document.getElementById('resultados-pesquisa').classList.remove('hidden');
+
+        const container = document.getElementById('resultados-container');
+        container.innerHTML = "";
+        document.getElementById('ver-mais-container').innerHTML = "";
+
+        // Músicas locais
+        const locais = musicasData.filter(m =>
+            m.titulo.toLowerCase().includes(query.toLowerCase()) ||
+            m.artista.toLowerCase().includes(query.toLowerCase())
+        );
+        if (locais.length > 0) {
+            locais.forEach(m => container.appendChild(criarCardLocal(m)));
+        } else {
+            const msg = document.createElement('div');
+            msg.className = "result-card";
+            msg.innerHTML = `<div class="result-info"><p>Nenhuma música local encontrada.</p></div>`;
+            container.appendChild(msg);
+        }
+
+        carregarYouTube(query, true);
+    }
+
+    function carregarYouTube(query, reset = true) {
+        if (reset) {
+            nextPageToken = null;
+            document.getElementById('ver-mais-container').innerHTML = "";
+        }
+        if (isLoadingMore) return;
+        isLoadingMore = true;
+
+        const loadingDiv = document.getElementById('loading-youtube');
+        loadingDiv.classList.remove('hidden');
+
+        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=3&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`;
+        if (nextPageToken) {
+            url += `&pageToken=${nextPageToken}`;
+        }
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                loadingDiv.classList.add('hidden');
+                isLoadingMore = false;
+                if (data.error) {
+                    console.error("YouTube API error:", data.error);
+                    if (data.error.code === 403 && data.error.message.includes("quota")) {
+                        const msg = document.createElement('div');
+                        msg.className = "result-card";
+                        msg.innerHTML = `<div class="result-info">
+                            <p>⚠️ Limite de pesquisas no YouTube atingido hoje. Clique abaixo para pesquisar diretamente:</p>
+                            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(currentQuery)}" target="_blank" style="color: #00f2ff;">🔍 Pesquisar no YouTube</a>
+                        </div>`;
+                        document.getElementById('resultados-container').appendChild(msg);
+                    } else {
+                        const msg = document.createElement('div');
+                        msg.className = "result-card";
+                        msg.innerHTML = `<div class="result-info"><p>Erro na API: ${data.error.message}. Tente novamente mais tarde.</p></div>`;
+                        document.getElementById('resultados-container').appendChild(msg);
+                    }
+                    return;
+                }
+                if (data.items && data.items.length > 0) {
+                    const container = document.getElementById('resultados-container');
+                    data.items.forEach(item => {
+                        const videoId = item.id.videoId;
+                        const titulo = item.snippet.title;
+                        const canal = item.snippet.channelTitle;
+                        const thumb = item.snippet.thumbnails.medium.url;
+                        container.appendChild(criarCardYouTube(videoId, titulo, canal, thumb));
+                    });
+                    nextPageToken = data.nextPageToken || null;
+                    if (nextPageToken) {
+                        const btn = document.createElement('button');
+                        btn.innerText = "VER MAIS RESULTADOS DO YOUTUBE";
+                        btn.className = "ver-mais";
+                        btn.onclick = () => carregarYouTube(currentQuery, false);
+                        document.getElementById('ver-mais-container').appendChild(btn);
+                    }
+                } else {
+                    const msg = document.createElement('div');
+                    msg.className = "result-card";
+                    msg.innerHTML = `<div class="result-info"><p>Nenhum resultado no YouTube para "${query}".</p></div>`;
+                    document.getElementById('resultados-container').appendChild(msg);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                loadingDiv.classList.add('hidden');
+                isLoadingMore = false;
+                const msg = document.createElement('div');
+                msg.className = "result-card";
+                msg.innerHTML = `<div class="result-info"><p>Erro de rede. Verifique sua conexão.</p></div>`;
+                document.getElementById('resultados-container').appendChild(msg);
+            });
+    }
+
+    function limparPesquisa() {
+        document.getElementById('search-input').value = "";
+        document.getElementById('resultados-pesquisa').classList.add('hidden');
+        document.getElementById('inicio').classList.remove('hidden');
+        document.getElementById('destaques-section').classList.remove('hidden');
+        document.getElementById('resultados-container').innerHTML = "";
+        document.getElementById('ver-mais-container').innerHTML = "";
+        currentQuery = "";
+        nextPageToken = null;
+    }
+
+    function criarCardLocal(m) {
+        const card = document.createElement('div');
+        card.className = "result-card";
+        card.innerHTML = `
+            <img src="${m.capa}" alt="${m.titulo}">
+            <div class="result-info"><h3>${m.artista} - ${m.titulo}</h3><p>📀 Música do Portal</p></div>
+            <div class="result-buttons">
+                <button class="btn-small" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}')">▶ Ouvir</button>
+                <button class="btn-small btn-share" onclick="copiarLinkLocal('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}')">🔗 Compartilhar</button>
+            </div>
+        `;
+        return card;
+    }
+
+    function criarCardYouTube(videoId, titulo, canal, thumb) {
+        const card = document.createElement('div');
+        card.className = "result-card youtube-card";
+        card.innerHTML = `
+            <img src="${thumb}" alt="${titulo}">
+            <div class="result-info"><h3>${titulo}</h3><p>${canal}</p></div>
+            <div class="result-buttons">
+                <button class="btn-small btn-youtube" onclick="abrirVideo('${videoId}')">🎬 Ver Vídeo</button>
+                <button class="btn-small btn-download-youtube" onclick="baixarVideoYouTube('${videoId}', '${titulo.replace(/'/g, "\\'")}')">⬇️ Baixar</button>
+                <button class="btn-small btn-share" onclick="compartilharVideo('${videoId}', '${titulo.replace(/'/g, "\\'")}')">🔗 Compartilhar</button>
+            </div>
+        `;
+        return card;
+    }
+
+    // ========== FUNÇÕES DO PLAYER E DOWNLOAD ==========
+    function abrirMusica(titulo, artista, capa, arquivo) {
+        document.getElementById('titulo-detalhe').innerText = titulo;
+        document.getElementById('artista-detalhe').innerText = artista;
+        document.getElementById('capa-detalhe').src = capa;
+        const btnDown = document.querySelector('.btn-download');
+        if (btnDown) {
+            btnDown.onclick = (e) => {
+                e.preventDefault();
+window.location.href = `download.html?file=${encodeURIComponent(arquivo)}&name=${encodeURIComponent(titulo)}&artist=${encodeURIComponent(artista)}&cover=${encodeURIComponent(capa)}`;
+            };
+        }
+        const player = document.getElementById('main-audio');
+        player.src = arquivo;
+        document.getElementById('p-titulo').innerText = titulo;
+        document.getElementById('p-artista').innerText = artista;
+        document.getElementById('player-bar').classList.remove('hidden');
+        mostrarSecao('detalhes-musica');
+    }
+
+    function mostrarSecao(id) {
+        document.querySelectorAll('.conteudo').forEach(s => s.classList.add('hidden'));
+        const secao = document.getElementById(id);
+        if (secao) secao.classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    function togglePlay() {
+        const audio = document.getElementById('main-audio');
+        const btn = document.getElementById('play-btn');
+        if (audio.paused) {
+            audio.play();
+            btn.innerText = '⏸';
+        } else {
+            audio.pause();
+            btn.innerText = "▶";
+        }
+    }
+
+    function abrirVideo(videoId) {
+        document.getElementById('youtubeIframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        document.getElementById('videoModal').style.display = "flex";
+    }
+
+    function fecharModal() {
+        document.getElementById('youtubeIframe').src = "";
+        document.getElementById('videoModal').style.display = "none";
+    }
+
+    function baixarVideoYouTube(videoId, titulo) {
+        window.location.href = `download.html?videoId=${videoId}&name=${encodeURIComponent(titulo)}&type=youtube`;
+    }
+
+    function compartilharVideo(videoId, titulo) {
+        const url = `https://www.youtube.com/watch?v=${videoId}`;
+        navigator.clipboard.writeText(`🎵 ${titulo}\n🎬 Assista no Portal Rich: ${url}`).then(() => alert("Link copiado!"));
+    }
+
+    function copiarLinkLocal(titulo, artista) {
+        const texto = `🎵 ${artista} - ${titulo}\n🎧 Ouça no Portal Rich Divulga\n🔗 ${window.location.href}`;
+        navigator.clipboard.writeText(texto).then(() => alert("Link copiado!"));
+    }
+
+    // ========== TEMA (CLARO/ESCURO) ==========
+    function alternarTema() {
+        const body = document.body;
+        const botaoTema = document.querySelector('.tema-flutuante');
+        body.classList.toggle('light-mode');
+        const isLight = body.classList.contains('light-mode');
+        localStorage.setItem('tema-portal', isLight ? 'claro' : 'escuro');
+        if (botaoTema) {
+            botaoTema.innerHTML = isLight ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        }
+    }
+
+    // Carregar tema salvo
+    const temaGuardado = localStorage.getItem('tema-portal');
+    if (temaGuardado === 'claro') {
+        document.body.classList.add('light-mode');
+        const botaoTema = document.querySelector('.tema-flutuante');
+        if (botaoTema) botaoTema.innerHTML = '<i class="fas fa-sun"></i>';
+    }
+
+    // ========== INICIALIZAÇÃO ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarMusicasFirebase();
+        carregarDestaquesFirebase();
+        document.getElementById('inicio').classList.remove('hidden');
+        document.getElementById('resultados-pesquisa').classList.add('hidden');
+        document.getElementById('destaques-section').classList.remove('hidden');
+    });
+</script>
+
+<!-- Botões flutuantes -->
+<div class="zap-flutuante" onclick="falarNoZap()"><i class="fab fa-whatsapp"></i></div>
+<div class="tema-flutuante" onclick="alternarTema()"><i class="fas fa-moon"></i></div>
+
+</body>
+</html>

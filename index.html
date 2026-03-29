@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando | Portal Rich</title>
+    <style>
+        body {
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+        .logo-animada {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            animation: pulsar 1.5s infinite alternate;
+        }
+        .logo-animada span { color: #58a6ff; text-shadow: 0 0 10px rgba(88,166,255,0.5); }
+        .loader-bar { width: 200px; height: 4px; background: #161b22; border-radius: 10px; overflow: hidden; }
+        .loader-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #58a6ff, #00ff88); animation: carregar 2.5s forwards; }
+        @keyframes pulsar { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.05); opacity: 1; } }
+        @keyframes carregar { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="logo-animada">💸PORTAL<span> RICH</span></div>
+    <div class="loader-bar"><div class="loader-fill"></div></div>
+    <p style="margin-top: 15px; font-size: 0.8rem; color: #8b949e;">Divulga a tua música aqui...</p>
+    <script>
+        setTimeout(() => {
+            window.location.href = "home.html";
+        }, 3000);
+    </script>
+</body>
+</html>
