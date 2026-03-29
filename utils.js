@@ -20,7 +20,7 @@ function copiarLink() {
 
 function falarNoZap() {
   // Substitua pelo seu número de WhatsApp (código do país + número, sem +)
-  const numeroWhatsApp = "244900000000"; // ALTERE AQUI
+  const numeroWhatsApp = "+244932538808"; // ALTERE AQUI
   const mensagem = encodeURIComponent("Olá! Quero divulgar minha música no Portal Rich Divulga 🎵");
   window.open(`https://wa.me/${numeroWhatsApp}?text=${mensagem}`, '_blank');
 }
