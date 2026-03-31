@@ -342,10 +342,10 @@ body {
     background: var(--neon) !important;
     color: #000 !important;
     border: none !important;
-    padding: 16px !important;
+    padding: 10px 20px !important;  /* mesmo padding do .btn-download */
     border-radius: 12px !important;
     font-weight: 900 !important;
-    width: 100% !important;
+    width: auto !important;          /* mesmo width do .btn-download */
     cursor: pointer !important;
     box-shadow: 0 0 15px var(--neon) !important;
     text-transform: uppercase !important;
