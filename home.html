@@ -159,7 +159,7 @@
                 <h2 id="titulo-detalhe"></h2>
                 <p id="artista-detalhe"></p>
                 <a href="#" class="btn-download">BAIXAR MP3 AGORA</a>
-                <button class="btn-neon" style="margin-top: 15px;" onclick="copiarLink()">🔗 COPIAR LINK DA MÚSICA</button>
+                <button class="btn-neon" style="margin-top: 15px;" id="btn-copiar-link-detalhe">🔗 COPIAR LINK DA MÚSICA</button>
                 <div id="copy-toast" class="hidden" style="color: #00ff88; margin-top: 10px;">✅ Link Copiado!</div>
             </div>
         </div>
@@ -207,20 +207,25 @@
     const db = firebase.database();
 
     // ========== VARIÁVEIS GLOBAIS ==========
-    let musicasData = [];
+    let musicasData = [];          // cada objeto agora tem .firebaseKey
     let currentQuery = "";
     let nextPageToken = null;
     let isLoadingMore = false;
     const YOUTUBE_API_KEY = "AIzaSyCmI5QGr6kM9ZvvYcG7_ckcho870-6WAr0";
+    let currentMusicaKey = null;   // guarda a chave da música atual
 
     // ========== CARREGAR DADOS DO FIREBASE ==========
     function carregarMusicasFirebase() {
         db.ref('musicas').on('value', snapshot => {
             musicasData = [];
             snapshot.forEach(child => {
-                musicasData.push(child.val());
+                const musica = child.val();
+                musica.firebaseKey = child.key;   // guarda a chave única
+                musicasData.push(musica);
             });
             renderizarFeedLocal();
+            // Após carregar, verifica se há parâmetro na URL
+            verificarMusicaNaUrl();
         });
     }
 
@@ -242,12 +247,22 @@
             const card = document.createElement('article');
             card.className = m.destaque ? "post-card destaque-semana" : "post-card";
             card.innerHTML = `
-                <img src="${m.capa}" alt="Capa" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}')">
-                <div class="info" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}')">
+                <img src="${m.capa}" alt="Capa" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}', '${m.firebaseKey}')">
+                <div class="info" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}', '${m.firebaseKey}')">
                     <h3>${m.artista} - ${m.titulo}</h3>
                     <small>Portal Rich Divulga</small>
                 </div>
             `;
+            // Botão compartilhar no card
+            const btnShare = document.createElement('button');
+            btnShare.className = "btn-small btn-share";
+            btnShare.innerHTML = "🔗 Compartilhar";
+            btnShare.style.marginTop = "8px";
+            btnShare.onclick = (e) => {
+                e.stopPropagation();
+                compartilharMusica(m);
+            };
+            card.appendChild(btnShare);
             feed.appendChild(card);
         });
     }
@@ -267,6 +282,40 @@
             `;
             container.appendChild(card);
         });
+    }
+
+    // ========== COMPARTILHAMENTO ==========
+    function compartilharMusica(musica) {
+        const url = `${window.location.origin}${window.location.pathname}?musica=${musica.firebaseKey}`;
+        const texto = `🎵 ${musica.artista} - ${musica.titulo}\n🎧 Ouça no Portal Rich Divulga\n🔗 ${url}`;
+        if (navigator.share) {
+            navigator.share({
+                title: `${musica.artista} - ${musica.titulo}`,
+                text: `Ouça no Portal Rich Divulga`,
+                url: url
+            }).catch(() => {
+                navigator.clipboard.writeText(texto);
+                alert("Link copiado!");
+            });
+        } else {
+            navigator.clipboard.writeText(texto);
+            alert("Link copiado! Compartilhe com seus amigos.");
+        }
+    }
+
+    // ========== VERIFICAR PARÂMETRO NA URL ==========
+    function verificarMusicaNaUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const musicaKey = params.get('musica');
+        if (musicaKey) {
+            const musica = musicasData.find(m => m.firebaseKey === musicaKey);
+            if (musica) {
+                // Abre a música diretamente
+                abrirMusica(musica.titulo, musica.artista, musica.capa, musica.arquivo, musica.firebaseKey);
+            } else {
+                console.warn("Música não encontrada com a chave:", musicaKey);
+            }
+        }
     }
 
     // ========== FUNÇÕES DE PESQUISA ==========
@@ -403,8 +452,8 @@
             <img src="${m.capa}" alt="${m.titulo}">
             <div class="result-info"><h3>${m.artista} - ${m.titulo}</h3><p>📀 Música do Portal</p></div>
             <div class="result-buttons">
-                <button class="btn-small" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}')">▶ Ouvir</button>
-                <button class="btn-small btn-share" onclick="copiarLinkLocal('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}')">🔗 Compartilhar</button>
+                <button class="btn-small" onclick="abrirMusica('${m.titulo.replace(/'/g, "\\'")}', '${m.artista.replace(/'/g, "\\'")}', '${m.capa}', '${m.arquivo}', '${m.firebaseKey}')">▶ Ouvir</button>
+                <button class="btn-small btn-share" onclick="compartilharMusica(${JSON.stringify(m).replace(/'/g, "\\'")})">🔗 Compartilhar</button>
             </div>
         `;
         return card;
@@ -426,7 +475,8 @@
     }
 
     // ========== FUNÇÕES DO PLAYER E DOWNLOAD ==========
-    function abrirMusica(titulo, artista, capa, arquivo) {
+    function abrirMusica(titulo, artista, capa, arquivo, firebaseKey) {
+        currentMusicaKey = firebaseKey;
         document.getElementById('titulo-detalhe').innerText = titulo;
         document.getElementById('artista-detalhe').innerText = artista;
         document.getElementById('capa-detalhe').src = capa;
@@ -434,7 +484,20 @@
         if (btnDown) {
             btnDown.onclick = (e) => {
                 e.preventDefault();
-window.location.href = `download.html?file=${encodeURIComponent(arquivo)}&name=${encodeURIComponent(titulo)}&artist=${encodeURIComponent(artista)}&cover=${encodeURIComponent(capa)}`;
+                window.location.href = `download.html?file=${encodeURIComponent(arquivo)}&name=${encodeURIComponent(titulo)}&artist=${encodeURIComponent(artista)}&cover=${encodeURIComponent(capa)}`;
+            };
+        }
+        // Atualiza o botão "COPIAR LINK DA MÚSICA" da página de detalhes
+        const btnCopiarDetalhe = document.getElementById('btn-copiar-link-detalhe');
+        if (btnCopiarDetalhe) {
+            btnCopiarDetalhe.onclick = () => {
+                if (currentMusicaKey) {
+                    const musica = musicasData.find(m => m.firebaseKey === currentMusicaKey);
+                    if (musica) compartilharMusica(musica);
+                    else alert("Erro ao gerar link");
+                } else {
+                    alert("Link não disponível");
+                }
             };
         }
         const player = document.getElementById('main-audio');
@@ -481,11 +544,6 @@ window.location.href = `download.html?file=${encodeURIComponent(arquivo)}&name=$
     function compartilharVideo(videoId, titulo) {
         const url = `https://www.youtube.com/watch?v=${videoId}`;
         navigator.clipboard.writeText(`🎵 ${titulo}\n🎬 Assista no Portal Rich: ${url}`).then(() => alert("Link copiado!"));
-    }
-
-    function copiarLinkLocal(titulo, artista) {
-        const texto = `🎵 ${artista} - ${titulo}\n🎧 Ouça no Portal Rich Divulga\n🔗 ${window.location.href}`;
-        navigator.clipboard.writeText(texto).then(() => alert("Link copiado!"));
     }
 
     // ========== TEMA (CLARO/ESCURO) ==========
