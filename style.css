@@ -92,34 +92,38 @@ body {
     display: block !important;
 }
 
-/* ========== FEED DE MÚSICAS ========== */
+/* ========== FEED DE MÚSICAS (HORIZONTAL) ========== */
 .feed-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    overflow-x: auto;
     gap: 12px;
     padding: 10px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
 }
-@media (min-width: 768px) {
-    .feed-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+.feed-grid::-webkit-scrollbar {
+    height: 6px;
 }
-
+.feed-grid::-webkit-scrollbar-thumb {
+    background: var(--neon);
+    border-radius: 3px;
+}
 .post-card {
+    flex: 0 0 auto;
+    width: 140px;
     background: #161b22;
     border: 1px solid #30363d;
     border-radius: 12px;
-    padding: 10px;
-    transition: all 0.4s ease;
+    padding: 8px;
+    transition: all 0.3s ease;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
+    text-align: center;
     animation: entradaSuave 0.6s ease-out forwards;
 }
 .post-card:hover {
-    border-color: #58a6ff;
+    border-color: var(--neon);
     transform: translateY(-5px);
-    box-shadow: 0 0 20px rgba(88, 166, 255, 0.4);
+    box-shadow: 0 0 12px rgba(0,242,255,0.3);
 }
 .post-card img {
     width: 100%;
@@ -128,25 +132,25 @@ body {
     border-radius: 8px;
     background: #0d1117;
     display: block;
+    margin-bottom: 8px;
 }
 .post-card h3 {
-    margin: 10px 0 5px;
-    font-size: 1rem;
-    color: #f0f6fc;
-}
-.info h3 {
+    font-size: 0.8rem;
+    margin: 5px 0 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin: 8px 0;
+    color: #f0f6fc;
 }
-
-/* Card de destaque */
+.post-card .info small {
+    font-size: 0.7rem;
+    color: #8b949e;
+}
+/* Card de destaque (mantido como estava) */
 .destaque-semana {
     border: 2px solid #ff00ff !important;
     box-shadow: 0 0 25px rgba(255, 0, 255, 0.4) !important;
     background: linear-gradient(145deg, #161b22, #21262d) !important;
-    grid-column: 1 / -1;
     transform: scale(1.02);
 }
 .badge-destaque {
@@ -258,16 +262,9 @@ body {
     align-items: center;
     gap: 5px;
 }
-.btn-youtube {
-    background: #ff0000;
-}
-.btn-download-youtube {
-    background: #f97316;
-}
-.btn-share {
-    background: #00f2ff;
-    color: black;
-}
+.btn-youtube { background: #ff0000; }
+.btn-download-youtube { background: #f97316; }
+.btn-share { background: #00f2ff; color: black; }
 .ver-mais {
     background: transparent;
     border: 1px solid #00f2ff;
@@ -330,10 +327,10 @@ body {
     background: var(--neon);
     color: #000;
     border: none;
-    padding: 10px 20px;
+    padding: 16px;
     border-radius: 12px;
     font-weight: 900;
-    width: auto;
+    width: 100%;
     margin-top: 20px;
     box-shadow: 0 0 15px var(--neon);
     cursor: pointer;
@@ -341,15 +338,14 @@ body {
     display: inline-block;
     text-align: center;
 }
-
 .btn-neon {
     background: var(--neon) !important;
     color: #000 !important;
     border: none !important;
-    padding: 10px 20px !important;
+    padding: 16px !important;
     border-radius: 12px !important;
     font-weight: 900 !important;
-    width: auto !important;
+    width: 100% !important;
     cursor: pointer !important;
     box-shadow: 0 0 15px var(--neon) !important;
     text-transform: uppercase !important;
@@ -425,8 +421,8 @@ body {
     position: fixed;
     bottom: 85px;
     right: 20px;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     background-color: #25d366;
     color: white;
     border-radius: 50%;
@@ -444,13 +440,12 @@ body {
     transform: scale(1.1);
     box-shadow: 0 0 25px rgba(37, 211, 102, 0.8);
 }
-
 .tema-flutuante {
     position: fixed;
-    bottom: 8px;
-    left: 20px;
-    width: 35px;
-    height: 35px;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
     background-color: var(--neon);
     color: #000;
     border-radius: 50%;
@@ -458,7 +453,7 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 30px;
-    box-shadow: 0 0 10px var(--neon);
+    box-shadow: 0 0 15px var(--neon);
     z-index: 1000;
     cursor: pointer;
     transition: all 0.3s ease;
