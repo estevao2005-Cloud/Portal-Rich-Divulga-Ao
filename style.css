@@ -327,10 +327,10 @@ body {
     background: var(--neon);
     color: #000;
     border: none;
-    padding: 16px;
+    padding: 10px 20px;      /* mesmo padding do .btn-neon */
     border-radius: 12px;
     font-weight: 900;
-    width: 100%;
+    width: auto;              /* remove o width: 100% */
     margin-top: 20px;
     box-shadow: 0 0 15px var(--neon);
     cursor: pointer;
@@ -597,4 +597,7 @@ body.light-mode .close-modal {
 body.light-mode .tema-flutuante {
     background-color: #0077ff;
     color: #fff;
+}
+.page-detalhes .card-detalhe-central {
+    text-align: center;
 }
