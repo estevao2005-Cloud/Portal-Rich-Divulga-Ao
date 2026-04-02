@@ -527,11 +527,17 @@
         navigator.clipboard.writeText(`🎵 ${titulo}\n🎬 Assista no Portal Rich: ${url}`).then(() => alert("Link copiado!"));
     }
 
-    function copiarLinkLocal(titulo, artista, firebaseKey) {
-        const url = `${window.location.origin}${window.location.pathname}?musica=${firebaseKey}`;
-        const texto = `🎵 ${artista} - ${titulo}\n🎧 Ouça no Portal Rich Divulga\n🔗 ${url}`;
+   function copiarLinkLocal(titulo, artista, firebaseKey) {
+    // Encontra a música completa
+    const musica = musicasData.find(m => m.firebaseKey === firebaseKey);
+    if (musica) {
+        const url = `${window.location.origin}/download.html?file=${encodeURIComponent(musica.arquivo)}&name=${encodeURIComponent(titulo)}&artist=${encodeURIComponent(artista)}&cover=${encodeURIComponent(musica.capa)}`;
+        const texto = `🎵 ${artista} - ${titulo}\n🎧 Ouça e baixe no Portal Rich Divulga\n🔗 ${url}`;
         navigator.clipboard.writeText(texto).then(() => alert("Link copiado!"));
+    } else {
+        alert("Erro ao gerar link.");
     }
+
 
     // ========== TEMA (CLARO/ESCURO) ==========
     function alternarTema() {
